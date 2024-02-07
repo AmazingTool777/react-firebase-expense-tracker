@@ -1,6 +1,7 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet, redirect } from "@tanstack/react-router";
 
 import App from "../App";
+import useAuthStore from "../stores/auth.store";
 
 export const Route = createRootRoute({
   component: () => (
@@ -8,4 +9,14 @@ export const Route = createRootRoute({
       <Outlet />
     </App>
   ),
+  async beforeLoad({ location }) {
+    if (
+      location.href === "/dashboard" &&
+      !useAuthStore.getState().isAuthenticated
+    ) {
+      throw redirect({
+        to: "/",
+      });
+    }
+  },
 });
