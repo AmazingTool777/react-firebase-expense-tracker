@@ -1,16 +1,25 @@
-import { Link as RouterLink } from "@tanstack/react-router";
+import { Link as RouterLink, useNavigate } from "@tanstack/react-router";
+import { signOut } from "firebase/auth";
 import { Button, Container, Flex, Heading, Link } from "@chakra-ui/react";
 import { ArrowForwardIcon } from "@chakra-ui/icons";
 
 import useAuthStore from "../stores/auth.store";
+import { auth } from "../firebase";
 
 const activeLinkStyle: React.CSSProperties = {
   color: "var(--chakra-colors-teal-600)",
 };
 
 export default function AppBar() {
+  const navigate = useNavigate();
+
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const fullName = useAuthStore((state) => state.fullName);
+
+  async function handleSignout() {
+    await signOut(auth);
+    navigate({ to: "/" });
+  }
 
   return (
     <Container bgColor="white">
@@ -38,7 +47,11 @@ export default function AppBar() {
           ) : (
             <>
               <span>{fullName ?? "..."}</span>
-              <Button colorScheme="red" rightIcon={<ArrowForwardIcon />}>
+              <Button
+                colorScheme="red"
+                rightIcon={<ArrowForwardIcon />}
+                onClick={handleSignout}
+              >
                 Sign out
               </Button>
             </>
