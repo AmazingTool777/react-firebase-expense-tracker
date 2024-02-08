@@ -13,13 +13,12 @@ import {
   Input,
 } from "@chakra-ui/react";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-import { addDoc } from "firebase/firestore";
 
 import GoogleAuthBtn from "../components/GoogleAuthBtn";
-import { auth, googleAuthProvider, collectionsRefs } from "../firebase";
-import { GoogleAuthUserCredential } from "../types";
+import { auth } from "../firebase";
+import useGoogleSignIn from "../hooks/useGoogleSignIn";
 
 export const Route = createLazyFileRoute("/")({
   component: SignInPage,
@@ -86,24 +85,7 @@ function SignInPage() {
     }
   }
 
-  async function handleGoogleSignIn() {
-    const userCrendential = (await signInWithPopup(
-      auth,
-      googleAuthProvider
-    )) as GoogleAuthUserCredential;
-    const fullName = userCrendential.user.displayName as string;
-    if (userCrendential._tokenResponse.isNewUser) {
-      try {
-        addDoc(collectionsRefs.users, {
-          fullName,
-          accountId: userCrendential.user.uid,
-        });
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    navigate({ to: "/dashboard" });
-  }
+  const { handleGoogleSignIn } = useGoogleSignIn();
 
   return (
     <div>
