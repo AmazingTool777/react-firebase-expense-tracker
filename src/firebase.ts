@@ -23,4 +23,6 @@ export const db = getFirestore(app);
 
 export const collectionsRefs = {
   users: collection(db, "users"),
+  transactions: collection(db, "transactions"),
+  balance: collection(db, "balance"),
 };

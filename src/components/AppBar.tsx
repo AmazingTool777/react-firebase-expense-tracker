@@ -22,7 +22,7 @@ export default function AppBar() {
   }
 
   return (
-    <Container bgColor="white">
+    <Container bgColor="white" position="sticky" top="0">
       <Flex height="4rem" justifyContent="space-between" alignItems="center">
         <Heading size="md">🧾 Expense tracker</Heading>
         <Flex alignItems="center" gap="1rem">
