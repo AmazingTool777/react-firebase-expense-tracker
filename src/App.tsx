@@ -9,7 +9,9 @@ function App({ children }: PropsWithChildren) {
     <AuthSetup>
       <Box bgColor="gray.200" minH="100vh" pb="3rem">
         <AppBar />
-        <Container mt="1.5rem">{children}</Container>
+        <Container mt="1.5rem" maxW="48rem">
+          {children}
+        </Container>
       </Box>
     </AuthSetup>
   );

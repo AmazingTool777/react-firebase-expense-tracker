@@ -1,6 +1,6 @@
 import { Link as RouterLink, useNavigate } from "@tanstack/react-router";
 import { signOut } from "firebase/auth";
-import { Button, Container, Flex, Heading, Link } from "@chakra-ui/react";
+import { Button, Card, Container, Flex, Heading, Link } from "@chakra-ui/react";
 import { ArrowForwardIcon } from "@chakra-ui/icons";
 
 import useAuthStore from "../stores/auth.store";
@@ -22,42 +22,44 @@ export default function AppBar() {
   }
 
   return (
-    <Container bgColor="white" position="sticky" top="0">
-      <Flex height="4rem" justifyContent="space-between" alignItems="center">
-        <Heading size="md">🧾 Expense tracker</Heading>
-        <Flex alignItems="center" gap="1rem">
-          {!isAuthenticated ? (
-            <>
-              <Link
-                as={RouterLink}
-                to="/"
-                activeOptions={{ exact: true }}
-                activeProps={{ style: activeLinkStyle }}
-              >
-                Sign in
-              </Link>
-              <Link
-                as={RouterLink}
-                to="/signup"
-                activeProps={{ style: activeLinkStyle }}
-              >
-                Sign up
-              </Link>
-            </>
-          ) : (
-            <>
-              <span>{fullName ?? "..."}</span>
-              <Button
-                colorScheme="red"
-                rightIcon={<ArrowForwardIcon />}
-                onClick={handleSignout}
-              >
-                Sign out
-              </Button>
-            </>
-          )}
+    <Card position="sticky" top="0" zIndex="5">
+      <Container bgColor="white" maxW="48rem">
+        <Flex height="4rem" justifyContent="space-between" alignItems="center">
+          <Heading size="md">🧾 Expense tracker</Heading>
+          <Flex alignItems="center" gap="1rem">
+            {!isAuthenticated ? (
+              <>
+                <Link
+                  as={RouterLink}
+                  to="/"
+                  activeOptions={{ exact: true }}
+                  activeProps={{ style: activeLinkStyle }}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  as={RouterLink}
+                  to="/signup"
+                  activeProps={{ style: activeLinkStyle }}
+                >
+                  Sign up
+                </Link>
+              </>
+            ) : (
+              <>
+                <span>{fullName ?? "..."}</span>
+                <Button
+                  colorScheme="red"
+                  rightIcon={<ArrowForwardIcon />}
+                  onClick={handleSignout}
+                >
+                  Sign out
+                </Button>
+              </>
+            )}
+          </Flex>
         </Flex>
-      </Flex>
-    </Container>
+      </Container>
+    </Card>
   );
 }
