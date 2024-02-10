@@ -25,6 +25,7 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import {
   DocumentSnapshot,
   addDoc,
+  deleteDoc,
   doc,
   getAggregateFromServer,
   getDocs,
@@ -54,6 +55,7 @@ import AppIntersectionObserver from "../components/AppIntersectionObserver";
 import EditTransactionModal, {
   EditRecordFormSubmitPayload,
 } from "../components/EditTransactionModal";
+import DeleteTransactionModal from "../components/DeleteTransactionModal";
 
 export const Route = createLazyFileRoute("/dashboard")({
   component: Dashboard,
@@ -153,9 +155,7 @@ function Dashboard() {
       });
     },
     onSuccess() {
-      queryClient.invalidateQueries({
-        queryKey: [BALANCE_QUERY_KEY],
-      });
+      invalidateQueries();
     },
   });
 
@@ -166,17 +166,34 @@ function Dashboard() {
         return updateDoc(doc(db, "transactions", transaction.id), payload);
       },
       onSuccess() {
-        queryClient.invalidateQueries({
-          queryKey: [BALANCE_QUERY_KEY],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [TRANSACTIONS_QUERY_KEY],
-        });
+        invalidateQueries();
       },
       onError(error) {
         console.log({ error });
       },
     });
+
+  // Mutation: Delete a transaction
+  const { mutate: deleteTransaction } = useMutation({
+    mutationFn(transaction: Transaction) {
+      return deleteDoc(doc(db, "transactions", transaction.id));
+    },
+    onSuccess() {
+      invalidateQueries();
+    },
+    onError(error) {
+      console.log({ error });
+    },
+  });
+
+  function invalidateQueries() {
+    queryClient.invalidateQueries({
+      queryKey: [BALANCE_QUERY_KEY],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [TRANSACTIONS_QUERY_KEY],
+    });
+  }
 
   function getTransactionsSumQuery(isAddition: boolean) {
     return getAggregateFromServer(
@@ -321,11 +338,22 @@ function Dashboard() {
                           />
                         )}
                       </EditTransactionModal>
-                      <IconButton
-                        colorScheme="red"
-                        aria-label="Delete"
-                        icon={<DeleteIcon />}
-                      />
+                      {/* Delete a traditional modal + button */}
+                      <DeleteTransactionModal
+                        transaction={transaction}
+                        onSubmit={(transaction) =>
+                          deleteTransaction(transaction)
+                        }
+                      >
+                        {({ onOpen }) => (
+                          <IconButton
+                            colorScheme="red"
+                            aria-label="Delete"
+                            icon={<DeleteIcon />}
+                            onClick={onOpen}
+                          />
+                        )}
+                      </DeleteTransactionModal>
                     </Flex>
                   </Td>
                   <Td>
