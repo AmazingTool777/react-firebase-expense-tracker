@@ -25,6 +25,7 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import {
   DocumentSnapshot,
   addDoc,
+  doc,
   getAggregateFromServer,
   getDocs,
   limit,
@@ -33,6 +34,7 @@ import {
   serverTimestamp,
   startAfter,
   sum,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import {
@@ -45,10 +47,13 @@ import {
 import AddRecordForm, {
   AddRecordFormSubmitPayload,
 } from "../components/AddRecordForm";
-import { auth, collectionsRefs } from "../firebase";
+import { auth, collectionsRefs, db } from "../firebase";
 import { Transaction, TransactionAttributes } from "../types";
 import { toReadableDate } from "../utils/date-time.utils";
 import AppIntersectionObserver from "../components/AppIntersectionObserver";
+import EditTransactionModal, {
+  EditRecordFormSubmitPayload,
+} from "../components/EditTransactionModal";
 
 export const Route = createLazyFileRoute("/dashboard")({
   component: Dashboard,
@@ -57,6 +62,11 @@ export const Route = createLazyFileRoute("/dashboard")({
 export const BALANCE_QUERY_KEY = "Balance";
 export const TRANSACTIONS_QUERY_KEY = "Transactions";
 export const TRANSACTIONS_QUERY_LIMIT = 10;
+
+type EditTransactionMutationPayload = {
+  transaction: Transaction;
+  payload: EditRecordFormSubmitPayload;
+};
 
 const sortItemStyles = {
   color: `var(--chakra-colors-teal-700)`,
@@ -148,6 +158,25 @@ function Dashboard() {
       });
     },
   });
+
+  // Mutation: Edit a transaction
+  const { isPending: isEditingTransaction, mutate: editTransaction } =
+    useMutation({
+      mutationFn({ payload, transaction }: EditTransactionMutationPayload) {
+        return updateDoc(doc(db, "transactions", transaction.id), payload);
+      },
+      onSuccess() {
+        queryClient.invalidateQueries({
+          queryKey: [BALANCE_QUERY_KEY],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [TRANSACTIONS_QUERY_KEY],
+        });
+      },
+      onError(error) {
+        console.log({ error });
+      },
+    });
 
   function getTransactionsSumQuery(isAddition: boolean) {
     return getAggregateFromServer(
@@ -275,11 +304,23 @@ function Dashboard() {
                 <Tr key={transaction.id}>
                   <Td>
                     <Flex columnGap="0.5rem">
-                      <IconButton
-                        colorScheme="blue"
-                        aria-label="Edit"
-                        icon={<EditIcon />}
-                      />
+                      {/* Edit a transaction modal + button */}
+                      <EditTransactionModal
+                        transaction={transaction}
+                        isSubmitting={isEditingTransaction}
+                        onSubmit={(transaction, payload) =>
+                          editTransaction({ transaction, payload })
+                        }
+                      >
+                        {({ onOpen }) => (
+                          <IconButton
+                            colorScheme="blue"
+                            aria-label="Edit"
+                            icon={<EditIcon />}
+                            onClick={onOpen}
+                          />
+                        )}
+                      </EditTransactionModal>
                       <IconButton
                         colorScheme="red"
                         aria-label="Delete"
