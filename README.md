@@ -1,30 +1,16 @@
-# React + TypeScript + Vite
+# Expense tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a small expense tracker app that I built using [React](https://fr.react.dev/), [Typescript](https://www.typescriptlang.org/), [Chakra UI](https://chakra-ui.com/), [Tanstack Query (react-query)](https://tanstack.com/query/v3/), [Zustand](https://zustand-demo.pmnd.rs/) and [Firebase](https://firebase.google.com/).
 
-Currently, two official plugins are available:
+## Purpose
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This is just a random small project idea for me to get started with using Firebase and specifically on the web.  
+I've already went through quite a lot of concepts through building this project such as **authentication**, different types of queries to Firestore such as **simple queries**, **paginated queries**, **aggregated queries**, **writes operations**, with the **security rules** that go along with it, and also the setup of the [local Firebase emulator suite](https://firebase.google.com/docs/emulator-suite).  
+Unfortunately, since I'm currently on the free plan, I've not been able to deploy any [Firebase cloud functions](https://firebase.google.com/docs/functions) yet but I'm looking forwards to use this feature in my susbequent Firebase projects to enable more backend capabilities.
 
-## Expanding the ESLint configuration
+## Preview
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+The application was deployed using [Firebase hosting](https://firebase.google.com/docs/hosting). You can view the application live [here](https://fir-demo-69f18.web.app/).
 
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+Here is a screenshot of the dashboard:
+![Dashboard screenshot](./screenshot.png)
