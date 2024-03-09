@@ -30,7 +30,7 @@ import {
 } from "firebase/firestore";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { collectionsRefs } from "../firebase";
+import { auth, collectionsRefs } from "../firebase";
 import { Transaction, TransactionAttributes } from "../types";
 import AppIntersectionObserver from "../components/AppIntersectionObserver";
 import BalanceCard from "../components/BalanceCard";
@@ -63,6 +63,7 @@ function Dashboard() {
   } = useInfiniteQuery({
     queryKey: [TRANSACTIONS_QUERY_KEY, order],
     async queryFn({ pageParam: lastTransaction, queryKey }) {
+      console.log({ accountId: auth.currentUser?.uid, lastTransaction });
       const queryParams: Parameters<typeof query> = [
         collectionsRefs.transactions,
         orderBy("created_at", queryKey[1] as "asc" | "desc"),
@@ -71,7 +72,8 @@ function Dashboard() {
         queryParams.push(startAfter(lastTransaction));
       }
       queryParams.push(limit(TRANSACTIONS_QUERY_LIMIT));
-      return getDocs(query(...queryParams));
+      const data = await getDocs(query(...queryParams));
+      return data;
     },
     initialPageParam: null as DocumentSnapshot<unknown> | null,
     getNextPageParam(lastPage) {
@@ -153,7 +155,7 @@ function Dashboard() {
             </Thead>
             <Tbody>
               {transactions.map((transaction, i) => (
-                <TransactionRow transaction={transaction}>
+                <TransactionRow key={transaction.id} transaction={transaction}>
                   {/* The intersection observer that triggers the fetch of more results */}
                   {transactionsCount - 1 === i && (
                     <AppIntersectionObserver onIntersect={handleEndOfScroll} />
