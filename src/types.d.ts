@@ -24,3 +24,5 @@ export interface GoogleAuthUserCredential extends UserCredential {
     isNewUser?: boolean;
   };
 }
+
+export type BalanceSummary = Record<"incomes" | "expenses" | "balance", number>;

@@ -21,7 +21,12 @@ import {
   Box,
   NumberDecrementStepper,
 } from "@chakra-ui/react";
+import { doc, updateDoc } from "firebase/firestore";
+import { useMutation } from "@tanstack/react-query";
+
 import { Transaction } from "../types";
+import useReactQueryClientUtils from "../hooks/useQueryClientUtils";
+import { db } from "../firebase";
 
 export type EditRecordFormSubmitPayload = {
   label: string;
@@ -36,18 +41,11 @@ export type EditTransactionModalRenderPropsParams = {
 export type EditTransactionModalProps = {
   children?(params: EditTransactionModalRenderPropsParams): React.ReactNode;
   transaction: Transaction;
-  isSubmitting?: boolean;
-  onSubmit?(
-    transaction: Transaction,
-    payload: EditRecordFormSubmitPayload
-  ): void;
 };
 
 export default function EditTransactionModal({
   children,
   transaction,
-  isSubmitting = false,
-  onSubmit,
 }: EditTransactionModalProps) {
   const [label, setLabel] = useState(transaction.label);
   const [amount, setAmount] = useState(transaction.amount);
@@ -65,6 +63,20 @@ export default function EditTransactionModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, transaction]);
 
+  const { invalidateQueries } = useReactQueryClientUtils();
+  // Mutation: Edit a transaction
+  const { isPending: isSubmitting, mutate } = useMutation({
+    mutationFn(payload: EditRecordFormSubmitPayload) {
+      return updateDoc(doc(db, "transactions", transaction.id), payload);
+    },
+    onSuccess() {
+      invalidateQueries();
+    },
+    onError(error) {
+      console.log({ error });
+    },
+  });
+
   function reset() {
     setLabel(transaction.label);
     setAmount(transaction.amount);
@@ -73,9 +85,15 @@ export default function EditTransactionModal({
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    onSubmit && onSubmit(transaction, { label, amount, isAddition });
-    reset();
-    onClose();
+    mutate(
+      { label, amount, isAddition },
+      {
+        onSuccess() {
+          reset();
+          onClose();
+        },
+      }
+    );
   }
 
   return (

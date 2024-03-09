@@ -17,6 +17,10 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
+import { useMutation } from "@tanstack/react-query";
+import { addDoc, serverTimestamp } from "firebase/firestore";
+import { auth, collectionsRefs } from "../firebase";
+import useReactQueryClientUtils from "../hooks/useQueryClientUtils";
 
 export type AddRecordFormSubmitPayload = {
   label: string;
@@ -24,34 +28,46 @@ export type AddRecordFormSubmitPayload = {
   isAddition: boolean;
 };
 
-export type AddRecordFormProps = {
-  isSubmitting?: boolean;
-  onSubmit?(payload: AddRecordFormSubmitPayload): void;
-};
+export default function AddRecordForm() {
+  const { invalidateQueries } = useReactQueryClientUtils();
 
-export default function AddRecordForm({
-  isSubmitting,
-  onSubmit,
-}: AddRecordFormProps) {
   const [amount, setAmount] = useState(0);
   const [label, setLabel] = useState("");
   const [isAddition, setIsAddition] = useState(true);
 
   const canSubmit = amount > 0 && !!label;
 
+  // Mutation: Record creation
+  const { mutate, isPending: isSubmitting } = useMutation({
+    mutationFn(payload: AddRecordFormSubmitPayload) {
+      return addDoc(collectionsRefs.transactions, {
+        ...payload,
+        accountId: auth.currentUser?.uid,
+        created_at: serverTimestamp(),
+      });
+    },
+    onSuccess() {
+      invalidateQueries();
+    },
+  });
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (onSubmit) {
-      onSubmit({
+    mutate(
+      {
         amount,
         label,
         isAddition,
-      });
-      // Reset
-      setAmount(0);
-      setIsAddition(true);
-      setLabel("");
-    }
+      },
+      {
+        onSettled() {
+          // Reset
+          setAmount(0);
+          setIsAddition(true);
+          setLabel("");
+        },
+      }
+    );
   }
 
   return (
