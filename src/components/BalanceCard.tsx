@@ -33,7 +33,7 @@ export default function BalanceCard() {
   const { data: balanceSummary, isLoading: balanceIsLoading } = useQuery<
     Record<"incomes" | "expenses" | "balance", number>
   >({
-    queryKey: [BALANCE_QUERY_KEY],
+    queryKey: [BALANCE_QUERY_KEY, userId],
     async queryFn() {
       const [incomesSumSnapshot, expensesSumSnapshot] = await Promise.all([
         // Sum of all incomes
@@ -49,6 +49,7 @@ export default function BalanceCard() {
         expenses,
       };
     },
+    enabled: !!userId,
   });
 
   const { getAmountColor } = useColors();
