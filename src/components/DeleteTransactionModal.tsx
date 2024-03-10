@@ -16,6 +16,7 @@ import { deleteDoc, doc } from "firebase/firestore";
 import { Transaction } from "../types";
 import { db } from "../firebase";
 import useReactQueryClientUtils from "../hooks/useQueryClientUtils";
+import useAuthStore from "../stores/auth.store";
 
 export type DeleteTransactionModalRenderPropsParams = {
   onOpen(): void;
@@ -30,13 +31,17 @@ export default function DeleteTransactionModal({
   children,
   transaction,
 }: DeleteTransactionModalProps) {
+  const userId = useAuthStore((s) => s.userId) as string;
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { invalidateQueries } = useReactQueryClientUtils();
   // Mutation: Delete a transaction
   const { mutate, isPending } = useMutation({
     mutationFn(transaction: Transaction) {
-      return deleteDoc(doc(db, "transactions", transaction.id));
+      return deleteDoc(
+        doc(db, "users", userId, "transactions", transaction.id)
+      );
     },
     onSuccess() {
       invalidateQueries();

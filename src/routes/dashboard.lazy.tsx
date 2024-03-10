@@ -22,6 +22,7 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import { createLazyFileRoute } from "@tanstack/react-router";
 import {
   DocumentSnapshot,
+  collection,
   getDocs,
   limit,
   orderBy,
@@ -30,12 +31,13 @@ import {
 } from "firebase/firestore";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { auth, collectionsRefs } from "../firebase";
+import { db } from "../firebase";
 import { Transaction, TransactionAttributes } from "../types";
 import AppIntersectionObserver from "../components/AppIntersectionObserver";
 import BalanceCard from "../components/BalanceCard";
 import TransactionRow from "../components/TransactionRow";
 import AddRecordForm from "../components/AddRecordForm";
+import useAuthStore from "../stores/auth.store";
 
 export const Route = createLazyFileRoute("/dashboard")({
   component: Dashboard,
@@ -51,6 +53,8 @@ const sortItemStyles = {
 };
 
 function Dashboard() {
+  const userId = useAuthStore((s) => s.userId);
+
   const [order, setOrder] = useState<"asc" | "desc">("desc");
 
   // Transactions query
@@ -61,11 +65,10 @@ function Dashboard() {
     hasNextPage: transactionsHaveNextPage,
     fetchNextPage: fetchNextTransactionsPage,
   } = useInfiniteQuery({
-    queryKey: [TRANSACTIONS_QUERY_KEY, order],
+    queryKey: [TRANSACTIONS_QUERY_KEY, order, userId],
     async queryFn({ pageParam: lastTransaction, queryKey }) {
-      console.log({ accountId: auth.currentUser?.uid, lastTransaction });
       const queryParams: Parameters<typeof query> = [
-        collectionsRefs.transactions,
+        collection(db, "users", userId as string, "transactions"),
         orderBy("created_at", queryKey[1] as "asc" | "desc"),
       ];
       if (lastTransaction) {
@@ -79,6 +82,7 @@ function Dashboard() {
     getNextPageParam(lastPage) {
       return lastPage.docs[TRANSACTIONS_QUERY_LIMIT - 1] ?? null;
     },
+    enabled: !!userId,
   });
   // The merged transactions array from the query
   const transactions = useMemo<Transaction[]>(() => {

@@ -16,10 +16,19 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { BALANCE_QUERY_KEY } from "../constants/query-keys.constants";
 import useColors from "../hooks/useColors";
-import { getAggregateFromServer, query, sum, where } from "firebase/firestore";
-import { auth, collectionsRefs } from "../firebase";
+import {
+  collection,
+  getAggregateFromServer,
+  query,
+  sum,
+  where,
+} from "firebase/firestore";
+import { auth, db } from "../firebase";
+import useAuthStore from "../stores/auth.store";
 
 export default function BalanceCard() {
+  const userId = useAuthStore((s) => s.userId);
+
   // Balance query
   const { data: balanceSummary, isLoading: balanceIsLoading } = useQuery<
     Record<"incomes" | "expenses" | "balance", number>
@@ -50,7 +59,7 @@ export default function BalanceCard() {
   function getTransactionsSumQuery(isAddition: boolean) {
     return getAggregateFromServer(
       query(
-        collectionsRefs.transactions,
+        collection(db, "users", userId as string, "transactions"),
         where("accountId", "==", auth.currentUser?.uid),
         where("isAddition", "==", isAddition)
       ),

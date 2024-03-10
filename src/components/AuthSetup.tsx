@@ -12,24 +12,24 @@ export default function AuthSetup({ children }: PropsWithChildren) {
 
   const setAuthenticated = useAuthStore((s) => s.setAuthenticated);
   const setFullName = useAuthStore((s) => s.setFullName);
+  const setUserId = useAuthStore((s) => s.setUserId);
 
   useEffect(() => {
     return auth.onAuthStateChanged(async (user) => {
       setAuthenticated(!!user, user?.displayName);
       if (user) {
-        if (!user.displayName) {
-          // Getting the associated user data
-          getDocs(
-            query(collectionsRefs.users, where("accountId", "==", user.uid))
-          ).then((usersDocs) => {
-            usersDocs.forEach((doc) => {
-              setFullName((doc.data() as UserAttributes).fullName);
-            });
+        // Getting the associated user data
+        getDocs(
+          query(collectionsRefs.users, where("accountId", "==", user.uid))
+        ).then((usersDocs) => {
+          usersDocs.forEach((doc) => {
+            setFullName((doc.data() as UserAttributes).fullName);
+            setUserId(doc.id);
           });
-        }
-        if (router.state.resolvedLocation.href !== "/dashboard") {
-          navigate({ to: "/dashboard" });
-        }
+        });
+      }
+      if (router.state.resolvedLocation.href !== "/dashboard") {
+        navigate({ to: "/dashboard" });
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

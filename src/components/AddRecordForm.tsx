@@ -18,9 +18,10 @@ import {
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import { useMutation } from "@tanstack/react-query";
-import { addDoc, serverTimestamp } from "firebase/firestore";
-import { auth, collectionsRefs } from "../firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "../firebase";
 import useReactQueryClientUtils from "../hooks/useQueryClientUtils";
+import useAuthStore from "../stores/auth.store";
 
 export type AddRecordFormSubmitPayload = {
   label: string;
@@ -29,6 +30,8 @@ export type AddRecordFormSubmitPayload = {
 };
 
 export default function AddRecordForm() {
+  const userId = useAuthStore((s) => s.userId) as string;
+
   const { invalidateQueries } = useReactQueryClientUtils();
 
   const [amount, setAmount] = useState(0);
@@ -40,7 +43,7 @@ export default function AddRecordForm() {
   // Mutation: Record creation
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn(payload: AddRecordFormSubmitPayload) {
-      return addDoc(collectionsRefs.transactions, {
+      return addDoc(collection(db, "users", userId, "transactions"), {
         ...payload,
         accountId: auth.currentUser?.uid,
         created_at: serverTimestamp(),
