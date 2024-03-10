@@ -23,7 +23,7 @@ import {
   sum,
   where,
 } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { db } from "../firebase";
 import useAuthStore from "../stores/auth.store";
 
 export default function BalanceCard() {
@@ -61,7 +61,6 @@ export default function BalanceCard() {
     return getAggregateFromServer(
       query(
         collection(db, "users", userId as string, "transactions"),
-        where("accountId", "==", auth.currentUser?.uid),
         where("isAddition", "==", isAddition)
       ),
       {
