@@ -10,30 +10,39 @@ export default function AuthSetup({ children }: PropsWithChildren) {
   const router = useRouter();
   const navigate = useNavigate();
 
+  const fullName = useAuthStore((s) => s.fullName);
   const setAuthenticated = useAuthStore((s) => s.setAuthenticated);
-  const setFullName = useAuthStore((s) => s.setFullName);
   const setUserId = useAuthStore((s) => s.setUserId);
 
   useEffect(() => {
     return auth.onAuthStateChanged(async (user) => {
-      setAuthenticated(!!user, user?.displayName);
       if (user) {
-        // Getting the associated user data
-        getDocs(
-          query(collectionsRefs.users, where("accountId", "==", user.uid))
-        ).then((usersDocs) => {
-          usersDocs.forEach((doc) => {
-            setFullName((doc.data() as UserAttributes).fullName);
-            setUserId(doc.id);
-          });
-        });
-      }
-      if (router.state.resolvedLocation.href !== "/dashboard") {
-        navigate({ to: "/dashboard" });
+        const authUserDocs = await getDocs(
+          query(collectionsRefs.users, where("accountId", "==", user?.uid))
+        );
+        if (fullName) {
+          setAuthenticated(true, fullName);
+        } else {
+          setAuthenticated(
+            true,
+            (authUserDocs.docs[0].data() as UserAttributes).fullName
+          );
+        }
+        setUserId(authUserDocs.docs[0].id);
+        if (router.state.resolvedLocation.href !== "/dashboard") {
+          navigate({ to: "/dashboard" });
+        }
+      } else {
+        setAuthenticated(false, null);
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    fullName,
+    navigate,
+    router.state.resolvedLocation.href,
+    setAuthenticated,
+    setUserId,
+  ]);
 
   return children;
 }

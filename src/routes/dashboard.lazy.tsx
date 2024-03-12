@@ -22,16 +22,16 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import { createLazyFileRoute } from "@tanstack/react-router";
 import {
   DocumentSnapshot,
-  collection,
   getDocs,
   limit,
   orderBy,
   query,
   startAfter,
+  where,
 } from "firebase/firestore";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { db } from "../firebase";
+import { auth, collectionsRefs } from "../firebase";
 import { Transaction, TransactionAttributes } from "../types";
 import AppIntersectionObserver from "../components/AppIntersectionObserver";
 import BalanceCard from "../components/BalanceCard";
@@ -68,7 +68,8 @@ function Dashboard() {
     queryKey: [TRANSACTIONS_QUERY_KEY, order, userId],
     async queryFn({ pageParam: lastTransaction, queryKey }) {
       const queryParams: Parameters<typeof query> = [
-        collection(db, "users", userId as string, "transactions"),
+        collectionsRefs.transactions,
+        where("accountId", "==", auth.currentUser?.uid as string),
         orderBy("created_at", queryKey[1] as "asc" | "desc"),
       ];
       if (lastTransaction) {

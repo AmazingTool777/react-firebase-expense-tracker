@@ -1,7 +1,15 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { GoogleAuthProvider, getAuth } from "firebase/auth";
-import { collection, getFirestore } from "firebase/firestore";
+import {
+  GoogleAuthProvider,
+  connectAuthEmulator,
+  getAuth,
+} from "firebase/auth";
+import {
+  collection,
+  connectFirestoreEmulator,
+  getFirestore,
+} from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -28,8 +36,6 @@ if (location.hostname === "localhost") {
 
 // Connects to the local emulators
 async function connectEmulators() {
-  const { connectFirestoreEmulator } = await import("firebase/firestore");
-  const { connectAuthEmulator } = await import("firebase/auth");
   // Local emultors settings
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
   connectFirestoreEmulator(db, "127.0.0.1", 8082);
@@ -37,4 +43,5 @@ async function connectEmulators() {
 
 export const collectionsRefs = {
   users: collection(db, "users"),
+  transactions: collection(db, "transactions"),
 };

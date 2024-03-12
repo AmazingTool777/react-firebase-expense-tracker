@@ -27,7 +27,6 @@ import { useMutation } from "@tanstack/react-query";
 import { Transaction } from "../types";
 import useReactQueryClientUtils from "../hooks/useQueryClientUtils";
 import { db } from "../firebase";
-import useAuthStore from "../stores/auth.store";
 
 export type EditRecordFormSubmitPayload = {
   label: string;
@@ -48,8 +47,6 @@ export default function EditTransactionModal({
   children,
   transaction,
 }: EditTransactionModalProps) {
-  const userId = useAuthStore((s) => s.userId) as string;
-
   const [label, setLabel] = useState(transaction.label);
   const [amount, setAmount] = useState(transaction.amount);
   const [isAddition, setIsAddition] = useState(transaction.isAddition);
@@ -70,10 +67,7 @@ export default function EditTransactionModal({
   // Mutation: Edit a transaction
   const { isPending: isSubmitting, mutate } = useMutation({
     mutationFn(payload: EditRecordFormSubmitPayload) {
-      return updateDoc(
-        doc(db, "users", userId, "transactions", transaction.id),
-        payload
-      );
+      return updateDoc(doc(db, "transactions", transaction.id), payload);
     },
     onSuccess() {
       invalidateQueries();

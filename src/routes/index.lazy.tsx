@@ -19,6 +19,7 @@ import { FirebaseError } from "firebase/app";
 import GoogleAuthBtn from "../components/GoogleAuthBtn";
 import { auth } from "../firebase";
 import useGoogleSignIn from "../hooks/useGoogleSignIn";
+import useAuthStore from "../stores/auth.store";
 
 export const Route = createLazyFileRoute("/")({
   component: SignInPage,
@@ -28,6 +29,8 @@ type FieldsErrors = Record<"email" | "password", string | null>;
 
 function SignInPage() {
   const navigate = useNavigate();
+
+  const setAuthenticated = useAuthStore((s) => s.setAuthenticated);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -69,6 +72,7 @@ function SignInPage() {
     try {
       setSubmitting(true);
       await signInWithEmailAndPassword(auth, email, password);
+      setAuthenticated(true);
       navigate({ to: "/dashboard" });
     } catch (error) {
       if (

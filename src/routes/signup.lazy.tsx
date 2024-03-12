@@ -19,9 +19,9 @@ import { FirebaseError } from "firebase/app";
 import { useNavigate } from "@tanstack/react-router";
 
 import { auth, collectionsRefs } from "../firebase";
-import { addDoc } from "firebase/firestore";
 import useAuthStore from "../stores/auth.store";
 import useGoogleSignIn from "../hooks/useGoogleSignIn";
+import { addDoc } from "firebase/firestore";
 
 export const Route = createLazyFileRoute("/signup")({
   component: SignupPage,
@@ -47,7 +47,7 @@ const initialFormValues: SignupPageFormFields = {
 export default function SignupPage() {
   const navigate = useNavigate();
 
-  const setFullName = useAuthStore((s) => s.setFullName);
+  const setAuthenticated = useAuthStore((s) => s.setAuthenticated);
 
   const [isSubmitting, setSubmitting] = useState(false);
   const [fieldsErrors, setFieldsErrors] = useState<SignupPageFormFieldsErrors>(
@@ -101,18 +101,16 @@ export default function SignupPage() {
     // Data submission
     setSubmitting(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(
+      const { user } = await createUserWithEmailAndPassword(
         auth,
         fields.email,
         fields.password
       );
-      // Storing the user document
+      setAuthenticated(true, fields.fullName);
       await addDoc(collectionsRefs.users, {
         fullName: fields.fullName,
-        accountId: userCredential.user.uid,
+        accountId: user.uid,
       });
-      // Setting the authenticated state
-      setFullName(fields.fullName);
       // To dashboard
       navigate({ to: "/dashboard" });
     } catch (error) {
