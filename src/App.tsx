@@ -1,7 +1,5 @@
-import { type PropsWithChildren } from "react";
-
-import Providers from "./Providers";
-import { RootLayout } from "./routes/__root";
+import { ChakraProvider } from "@chakra-ui/react";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 
 // Import the generated route tree
@@ -17,19 +15,15 @@ declare module "@tanstack/react-router" {
   }
 }
 
-export function AppWithoutRouter({ children }: PropsWithChildren) {
-  return (
-    <Providers>
-      <RootLayout>{children}</RootLayout>
-    </Providers>
-  );
-}
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <Providers>
-      <RouterProvider router={router} />
-    </Providers>
+    <QueryClientProvider client={queryClient}>
+      <ChakraProvider>
+        <RouterProvider router={router} />
+      </ChakraProvider>
+    </QueryClientProvider>
   );
 }
 
