@@ -1,6 +1,6 @@
 import { type PropsWithChildren } from "react";
 
-import AppBar from "../components/AppBar";
+import AppBar from "./AppBar";
 import { Box, Container } from "@chakra-ui/react";
 import AuthSetup from "../components/AuthSetup";
 
