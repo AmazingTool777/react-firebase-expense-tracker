@@ -104,7 +104,10 @@ export default function AddRecordForm() {
                 min={0}
                 onChange={(_, value) => setAmount(value || 0)}
               >
-                <NumberInputField disabled={isSubmitting} />
+                <NumberInputField
+                  placeholder="Amount"
+                  disabled={isSubmitting}
+                />
                 <NumberInputStepper>
                   <NumberIncrementStepper />
                   <NumberDecrementStepper />
