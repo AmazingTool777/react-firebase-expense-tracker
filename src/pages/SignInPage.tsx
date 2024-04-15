@@ -73,7 +73,11 @@ export default function SignInPage() {
     } catch (error) {
       if (
         error instanceof FirebaseError &&
-        error.code === "auth/invalid-credential"
+        [
+          "auth/invalid-credential",
+          "auth/user-not-found",
+          "auth/wrong-password",
+        ].includes(error.code)
       ) {
         setFieldsErrors({ email: "", password: "" });
         setErrorMessage("Wrong credentials. Try again.");
